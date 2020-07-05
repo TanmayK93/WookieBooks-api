@@ -11,7 +11,7 @@ namespace WookieBooksApi.Models
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid BookId { get; set; }
+        public int BookId { get; set; }
 
         [Required]
         public string Title { get; set; }
@@ -30,7 +30,7 @@ namespace WookieBooksApi.Models
         public bool BookPublished { get; set; }
 
         // Foreign Key
-        public Guid AuthorId { get; set; }
+        public int AuthorId { get; set; }
         // Navigation property
         public Author Author { get; set; }
     }

@@ -75,16 +75,15 @@ namespace WookieBooksApi
             return tokenHandler.WriteToken(token);
         }
 
-        public bool ValidateRequest(string Header, Guid userId)
+        public bool ValidateRequest(string Header, int userId)
         {
             var handler = new JwtSecurityTokenHandler();
             var authHeader = Header.Replace("Bearer ", "");
             var jsonToken = handler.ReadToken(authHeader);
             var tokenS = handler.ReadToken(authHeader) as JwtSecurityToken;
             var id = tokenS.Claims.First(claim => claim.Type == "UserId").Value;
-            Guid tokenUserid = new Guid(id);
             
-            if (tokenUserid == userId)
+            if (int.Parse(id) == userId)
             {
                 return true;
             }

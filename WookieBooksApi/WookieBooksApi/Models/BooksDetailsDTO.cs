@@ -4,7 +4,7 @@ namespace WookieBooksApi.Models
 {
     internal class BooksDetailsDTO
     {
-        public Guid bookId { get; set; }
+        public int bookId { get; set; }
         public string title { get; set; }
         public decimal price { get; set; }
         public string coverImage { get; set; }

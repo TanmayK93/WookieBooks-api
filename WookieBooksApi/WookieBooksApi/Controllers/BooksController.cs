@@ -49,7 +49,7 @@ namespace WookieBooksApi.Controllers
         // GET: api/Books/5
         [HttpGet("{id}.{format?}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Books>> GetBooksById(Guid id)
+        public async Task<ActionResult<Books>> GetBooksById(int id)
         {
             var book = await _context.Books.FindAsync(id);
 
@@ -94,13 +94,7 @@ namespace WookieBooksApi.Controllers
 
             if (author != null)
             {
-                _context.Books.Add(new Books {
-                    AuthorId = author.AuthorId,
-                    Title = book.Title,
-                    CoverImage = book.CoverImage,
-                    Description = book.Description,
-                    Price = book.Price
-                });
+                _context.Books.Add(book);
                 await _context.SaveChangesAsync();
             }
             else
@@ -108,15 +102,84 @@ namespace WookieBooksApi.Controllers
                 return NotFound(new { message = "Author Doesnt Exists!" });
             }
 
-            var id = _context.Entry(book).State = EntityState.Added;
+            _context.Entry(book).Reference(x => x.Author).Load();
 
-            var result =  _context.Entry(book).Entity;
-            
+            var booksDetails = new BooksDetailsDTO()
+            {
+                bookId = book.BookId,
+                title = book.Title,
+                price = book.Price,
+                coverImage = book.CoverImage,
+                description = book.Description,
+                authorName = book.Author.AuthorName,
+                authorPseudonym = book.Author.AuthorPseudonym
+            };
 
-            return Ok(new { message = "Book Added Successfully!", data = result });
+
+            return Ok(new { message = "Book Added Successfully!", data = booksDetails });
         }
-        
-        private bool BooksExists(Guid id)
+
+        // PUT: api/Books/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBooks(int id, Books book)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (!_userServices.ValidateRequest(authHeader, book.AuthorId))
+            {
+                return BadRequest(new { message = "Request Not Allowed" });
+            }
+
+            if (id != book.BookId)
+            {
+                return BadRequest();
+            }
+
+            try
+            {
+                _context.Entry(book).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException) //Deal Save changes Error
+            {
+                if (!BooksExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return StatusCode(403, new { message = "Invalid Request" });
+                }
+            }
+            
+            return Ok(new { message = "Book Record Updated Successfully..!" });
+        }
+
+        // DELETE: api/Books/5
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<Books>> DeleteBooks(int id)
+        {
+            var book = await _context.Books.FindAsync(id);
+            
+            if (book == null)
+            {
+                return NotFound(new { message = "No such Book found..!" });
+            }
+
+            try
+            {
+                _context.Books.Remove(book);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.ToString() });
+            }
+
+            return Ok(new { message = "Book record Deleted Successfully..!" });
+        }
+
+        private bool BooksExists(int id)
         {
             return _context.Books.Any(e => e.BookId == id);
         }
