@@ -179,6 +179,42 @@ namespace WookieBooksApi.Controllers
             return Ok(new { message = "Book record Deleted Successfully..!" });
         }
 
+        // DELETE
+        [HttpDelete("unpublishbook/{authorUId}/{bookid}")]
+        public async Task<ActionResult<Books>> PublishUnpublishBook([FromRoute] int authorUId, [FromRoute] int bookid)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (!_userServices.ValidateRequest(authHeader, authorUId))
+            {
+                return BadRequest(new { message = "Request Not Allowed" });
+            }
+
+            var books = _context.Books.FirstOrDefault
+                (b => b.BookId == bookid && b.Author.UserId == authorUId);
+
+            if (books != null)
+            {
+                books.BookPublished = books.BookPublished = false;
+                _context.Books.Update(books);
+            }
+            else
+            {
+                return NotFound(new { message = "No Record Found..!" });
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { message = e.ToString() });
+            }
+
+            return Ok(new { message = "Book Unpublish Successfuly." });
+        }
+
         private bool BooksExists(int id)
         {
             return _context.Books.Any(e => e.BookId == id);
