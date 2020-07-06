@@ -23,6 +23,10 @@ namespace WookieBooksApi.Models
             modelBuilder.Entity<Role>().HasData(
                     new Role() { RoleId = 1 , RoleName = "Admin" }, new Role { RoleId = 2, RoleName = "Author"});
 
+            modelBuilder.Entity<Author>().Property(x => x.AuthorPseudonym).HasDefaultValue("Wookie");
+
+            modelBuilder.Entity<UserRoleMapping>().Property(x => x.RoleId).HasDefaultValue(2);
+
             base.OnModelCreating(modelBuilder);
         }
 

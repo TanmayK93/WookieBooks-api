@@ -13,6 +13,7 @@ namespace WookieBooksApi.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int UserId { get; set; }
         public string UserName { get; set; }
+        public string Name { get; set; }
         public string Password { get; set; }
 
         public virtual ICollection<UserRoleMapping> UserRoles { get; set; }

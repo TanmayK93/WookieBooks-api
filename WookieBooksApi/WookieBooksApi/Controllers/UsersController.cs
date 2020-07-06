@@ -23,6 +23,50 @@ namespace WookieBooksApi.Controllers
             _userServices = userServices;
         }
 
+
+        // POST: api/Users/Register
+        [HttpPost]
+        [Route("Register")]
+        public async Task<ActionResult<User>> Register([FromBody] User user)
+        {
+            if (string.IsNullOrEmpty(user.UserName) ||
+                string.IsNullOrEmpty(user.Name) ||
+                string.IsNullOrEmpty(user.Password))
+            {
+                return BadRequest(new { message = "Please enter valid Details. Some Fields are missing..!" });
+            }
+
+            var checkUserExist = _context.Users.FirstOrDefault(x => x.UserName == user.UserName);
+
+            if (checkUserExist == null)
+            {
+
+                var passwordHasher = new PasswordHasher<User>();
+                var encryptPassword = passwordHasher.HashPassword(user, user.Password);
+
+                var result = _context.Users.Add(new User
+                {
+                    UserName = user.UserName,
+                    Password = encryptPassword,
+                    Name = user.Name
+                });
+                await _context.SaveChangesAsync();
+
+                Author author = new Author { AuthorName = user.Name, UserId = result.Entity.UserId };
+                _context.Authors.Add(author);
+                
+                _context.UserRoleMappings.Add(new UserRoleMapping { UserId = result.Entity.UserId });
+
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return BadRequest(new { message = "Username Already Exists." });
+            }
+
+            return Ok(new { message = "User Registered Successfully!" });
+        }
+
         // POST: api/Users/Login
         [HttpPost]
         [Route("Login")]
