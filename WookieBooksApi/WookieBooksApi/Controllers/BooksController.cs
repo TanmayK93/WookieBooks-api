@@ -12,6 +12,8 @@ namespace WookieBooksApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "Wookie")]
+    [FormatFilter]
     public class BooksController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -96,6 +98,24 @@ namespace WookieBooksApi.Controllers
                        ).ToList();
 
             return Ok(results);
+        }
+
+        // GET:
+        [Authorize]
+        [HttpGet("authorBooks/{userId}")]
+        public IActionResult GetBooksOfAuthor(int userId)
+        {
+            string authHeader = Request.Headers["Authorization"];
+
+            if (!_userServices.ValidateRequest(authHeader, userId))
+            {
+                return BadRequest(new { message = "Request Not Allowed" });
+            }
+
+            var result = _context.Books
+                             .Where(books => books.Author.UserId == userId)
+                             .ToList();
+            return Ok(result);
         }
 
         // POST: api/Books
