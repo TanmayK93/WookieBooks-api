@@ -74,6 +74,30 @@ namespace WookieBooksApi.Controllers
             return Ok(booksDetails);
         }
 
+        // GET: 
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public ActionResult<Books> SearchBooks([FromQuery] string title, [FromQuery] string authorName)
+        {
+
+            var results = _context.Books
+                          .Include(x=> x.Author)
+                          .Where(b => (b.Title.Contains(title) || title == null) && (b.Author.AuthorName.Contains(authorName) || authorName == null))
+                          .Select(books => new
+                           {
+                               bookId = books.BookId,
+                               title = books.Title,
+                               price = books.Price,
+                               coverImage = books.CoverImage,
+                               description = books.Description,
+                               authorName = books.Author.AuthorName,
+                               authorPseudonym = books.Author.AuthorPseudonym
+                           }
+                       ).ToList();
+
+            return Ok(results);
+        }
+
         // POST: api/Books
         [HttpPost]
         public async Task<ActionResult<Books>> PostBooks(Books book)
@@ -104,7 +128,7 @@ namespace WookieBooksApi.Controllers
 
             _context.Entry(book).Reference(x => x.Author).Load();
 
-            var booksDetails = new BooksDetailsDTO()
+            var booksDetails = new
             {
                 bookId = book.BookId,
                 title = book.Title,
@@ -112,7 +136,8 @@ namespace WookieBooksApi.Controllers
                 coverImage = book.CoverImage,
                 description = book.Description,
                 authorName = book.Author.AuthorName,
-                authorPseudonym = book.Author.AuthorPseudonym
+                authorPseudonym = book.Author.AuthorPseudonym,
+                bookPublished = book.BookPublished
             };
 
 
