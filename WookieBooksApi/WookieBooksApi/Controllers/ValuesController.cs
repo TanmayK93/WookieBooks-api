@@ -7,15 +7,15 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WookieBooksApi.Controllers
 {
+    [Authorize(Roles = "Wookie")]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Wookie")]
     [FormatFilter]
     public class ValuesController : ControllerBase
     {
         // GET api/values
-        [HttpGet]
         [AllowAnonymous]
+        [HttpGet]
         public ActionResult<IEnumerable<string>> Get()
         {
             return new string[] { "value1", "value2" };

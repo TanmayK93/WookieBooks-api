@@ -2,7 +2,7 @@
 
 namespace WookieBooksApi.Models
 {
-    internal class BooksDetailsDTO
+    public class BooksDetailsDTO
     {
         public int bookId { get; set; }
         public string title { get; set; }

@@ -10,9 +10,9 @@ using WookieBooksApi.Models;
 
 namespace WookieBooksApi.Controllers
 {
+    [Authorize(Roles = "Wookie")]
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Wookie")]
     [FormatFilter]
     public class BooksController : ControllerBase
     {
@@ -27,8 +27,8 @@ namespace WookieBooksApi.Controllers
         }
 
         // GET: api/Books
-        [HttpGet]
         [AllowAnonymous]
+        [HttpGet]
         public  ActionResult<IEnumerable<Books>> GetBooks()
         {
             var results =  (from books in _context.Books
@@ -49,9 +49,9 @@ namespace WookieBooksApi.Controllers
         }
 
         // GET: api/Books/5
-        [HttpGet("{id}.{format?}")]
         [AllowAnonymous]
-        public async Task<ActionResult<Books>> GetBooksById(int id)
+        [HttpGet("{id}.{format?}")]
+        public async Task<ActionResult<BooksDetailsDTO>> GetBooksById(int id)
         {
             var book = await _context.Books.FindAsync(id);
 
@@ -77,9 +77,9 @@ namespace WookieBooksApi.Controllers
         }
 
         // GET: 
-        [HttpGet("search")]
         [AllowAnonymous]
-        public ActionResult<Books> SearchBooks([FromQuery] string title, [FromQuery] string authorName)
+        [HttpGet("search")]
+        public ActionResult<BooksDetailsDTO> SearchBooks([FromQuery] string title, [FromQuery] string authorName)
         {
 
             var results = _context.Books
@@ -101,8 +101,8 @@ namespace WookieBooksApi.Controllers
         }
 
         // GET:
-        [Authorize]
         [HttpGet("authorBooks/{userId}")]
+        [Authorize]
         public IActionResult GetBooksOfAuthor(int userId)
         {
             string authHeader = Request.Headers["Authorization"];
@@ -120,7 +120,7 @@ namespace WookieBooksApi.Controllers
 
         // POST: api/Books
         [HttpPost]
-        public async Task<ActionResult<Books>> PostBooks(Books book)
+        public async Task<ActionResult<BooksDetailsDTO>> PostBooks(Books book)
         {
             string authHeader = Request.Headers["Authorization"];
 
@@ -135,29 +135,41 @@ namespace WookieBooksApi.Controllers
             }
 
             var author = await _context.Authors.SingleOrDefaultAsync(x=> x.UserId == book.AuthorId);
-
+            Books newBook;
             if (author != null)
             {
-                _context.Books.Add(book);
+                newBook = new Books
+                {
+                    AuthorId = author.AuthorId,
+                    Title = book.Title,
+                    CoverImage = book.CoverImage,
+                    Description = book.Description,
+                    Price = book.Price,
+                    BookPublished = book.BookPublished ? true : book.BookPublished
+                };
+
+                _context.Books.Add(newBook);
                 await _context.SaveChangesAsync();
+
+                int bookid = book.BookId;
             }
             else
             {
                 return NotFound(new { message = "Author Doesnt Exists!" });
             }
 
-            _context.Entry(book).Reference(x => x.Author).Load();
+            _context.Entry(newBook).GetDatabaseValues();
 
             var booksDetails = new
             {
-                bookId = book.BookId,
-                title = book.Title,
-                price = book.Price,
-                coverImage = book.CoverImage,
-                description = book.Description,
-                authorName = book.Author.AuthorName,
-                authorPseudonym = book.Author.AuthorPseudonym,
-                bookPublished = book.BookPublished
+                bookId = newBook.BookId,
+                title = newBook.Title,
+                price = newBook.Price,
+                coverImage = newBook.CoverImage,
+                description = newBook.Description,
+                authorName = newBook.Author.AuthorName,
+                authorPseudonym = newBook.Author.AuthorPseudonym,
+                bookPublished = newBook.BookPublished
             };
 
 
@@ -182,7 +194,21 @@ namespace WookieBooksApi.Controllers
 
             try
             {
-                _context.Entry(book).State = EntityState.Modified;
+                var author = await _context.Authors.SingleOrDefaultAsync(x => x.UserId == book.AuthorId);
+
+                var updateRec = new Books
+                {
+                    BookId = book.BookId,
+                    AuthorId = author.AuthorId,
+                    Title = book.Title,
+                    CoverImage = book.CoverImage,
+                    Description = book.Description,
+                    Price = book.Price,
+                    BookPublished = book.BookPublished
+                };
+
+                _context.Entry(updateRec).State = EntityState.Modified;
+
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException) //Deal Save changes Error

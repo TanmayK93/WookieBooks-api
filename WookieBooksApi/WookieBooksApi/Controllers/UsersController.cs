@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WookieBooksApi.Helpers;
 using WookieBooksApi.Models;
 
 namespace WookieBooksApi.Controllers
@@ -70,7 +71,7 @@ namespace WookieBooksApi.Controllers
         // POST: api/Users/Login
         [HttpPost]
         [Route("Login")]
-        public async Task<ActionResult<Author>> Login([FromBody] User user)
+        public async Task<ActionResult<ApiResponse>> Login([FromBody] User user)
         {
             if (string.IsNullOrEmpty(user.UserName) || string.IsNullOrEmpty(user.Password))
             {
