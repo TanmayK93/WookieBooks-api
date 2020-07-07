@@ -179,7 +179,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         }
 
         [Fact]
-        public void UpdateBooks_WithInValidDetails_ReturnStatusCode403()
+        public void UpdateBooks_WithInValidDetails_ReturnStatusCode404()
         {
 
             //Arrange
