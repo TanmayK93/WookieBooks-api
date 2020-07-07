@@ -258,7 +258,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         }
 
         [Fact]
-        public void DeleteBooks_WithValid_BookIdPass_ReturnStatusCode200NotFound()
+        public void DeleteBooks_WithValid_BookIdPass_ReturnStatusCode200()
         {
 
             //Arrange
@@ -274,6 +274,66 @@ namespace WookieBooksAPI.UnitTest.Controller
 
             // Assert
             Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
+        }
+
+        [Fact]
+        public void PublishUnpublishBook_WithValid_BookIdAndAuthorIdPass_ReturnStatusCode200()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            int authorID = 1;
+            int bookid = 2;
+
+            // Act
+            var result = booksController.PublishUnpublishBook(authorID,bookid);
+            var record = result.Result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
+        }
+
+        [Fact]
+        public void PublishUnpublishBook_With_ValidAuthorIdAndInvalidBookID_ReturnStatusCode400()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            int authorID = 1;
+            int bookid = 3;
+
+            // Act
+            var result = booksController.PublishUnpublishBook(authorID, bookid);
+            var record = result.Result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status404NotFound, record.StatusCode);
+        }
+
+        [Fact]
+        public void PublishUnpublishBook_With_InValidAuthorIdAndInvalidBookID_ReturnStatusCode400()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            int authorID = 12;
+            int bookid = 32;
+
+            // Act
+            var result = booksController.PublishUnpublishBook(authorID, bookid);
+            var record = result.Result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status404NotFound, record.StatusCode);
         }
     }
     

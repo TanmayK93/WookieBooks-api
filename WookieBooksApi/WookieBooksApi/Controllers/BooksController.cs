@@ -265,12 +265,14 @@ namespace WookieBooksApi.Controllers
         [HttpDelete("unpublishbook/{authorUId}/{bookid}")]
         public async Task<ActionResult<Books>> PublishUnpublishBook([FromRoute] int authorUId, [FromRoute] int bookid)
         {
+            /*
             string authHeader = Request.Headers["Authorization"];
 
             if (!_userServices.ValidateRequest(authHeader, authorUId))
             {
                 return BadRequest(new { message = "Request Not Allowed" });
             }
+            */
 
             var books = _context.Books.FirstOrDefault
                 (b => b.BookId == bookid && b.Author.UserId == authorUId);
