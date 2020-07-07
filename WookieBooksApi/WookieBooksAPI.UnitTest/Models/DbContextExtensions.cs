@@ -95,6 +95,7 @@ namespace WookieBooksAPI.UnitTest.Models
                     UserId = 2,
                     RoleId = 2,
                 },
+                //Admin
                 new UserRoleMapping
                 {
                     UserId = 3,

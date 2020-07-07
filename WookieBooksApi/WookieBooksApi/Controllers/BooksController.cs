@@ -129,6 +129,12 @@ namespace WookieBooksApi.Controllers
                 return BadRequest(new { message = "Request Not Allowed" });
             }
 
+            if (string.IsNullOrEmpty(book.Title) || book.Title.Length == 0 || book.Title.Equals(" ") || book.Price == 0 || book.Price <= 0 )
+            {
+                return BadRequest(new { message = "Please enter valid Details. Some Fields are missing..!" });
+            }
+
+            
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
