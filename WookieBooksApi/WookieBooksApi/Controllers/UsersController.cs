@@ -55,10 +55,14 @@ namespace WookieBooksApi.Controllers
 
                 Author author = new Author { AuthorName = user.Name, UserId = result.Entity.UserId };
                 _context.Authors.Add(author);
-                
-                _context.UserRoleMappings.Add(new UserRoleMapping { UserId = result.Entity.UserId });
-
                 await _context.SaveChangesAsync();
+
+                if(author.UserId == result.Entity.UserId)
+                {
+                    _context.UserRoleMappings.Add(new UserRoleMapping { UserId = result.Entity.UserId, RoleId = 2 });
+                    await _context.SaveChangesAsync();
+                }
+
             }
             else
             {

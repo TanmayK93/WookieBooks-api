@@ -10,6 +10,7 @@ using WookieBooksApi;
 using WookieBooksApi.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
+using WookieBooksAPI.UnitTest.MockData;
 
 namespace WookieBooksAPI.UnitTest.Controller
 {
@@ -103,8 +104,67 @@ namespace WookieBooksAPI.UnitTest.Controller
             Assert.Equal(StatusCodes.Status400BadRequest, data.StatusCode);
         }
 
+        [Fact]
+        public void Register_WhenCalledWithValid_UsernameAndPasswordAndName_ReturnsOk()
+        {
+            // Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var userServices = new UserServices(GetAppSettings());
+            var usersController = new UsersController(dbContext, userServices);
 
+            var mockUser = new User { UserName = "Tod", Password = "123456", Name = "Tod" };
 
+            // Act
+            var queryRes = usersController.Register(mockUser).Result;
+
+            var data = queryRes.Result as ObjectResult;
+
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status200OK, data.StatusCode);
+        }
+
+        [Theory]
+        [ClassData(typeof(UserTestData))]
+        public void Register_WhenCalledWithInValid_UsernameAndPassword_ReturnsBadRequest(User UserTestData)
+        {
+            // Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var userServices = new UserServices(GetAppSettings());
+            var usersController = new UsersController(dbContext, userServices);
+
+            // Act
+            var queryRes = usersController.Register(UserTestData).Result;
+
+            var data = queryRes.Result as ObjectResult;
+
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status400BadRequest, data.StatusCode);
+        }
+
+        [Fact]
+        public void Register_WhenCalledWith_AlreadyExistsUsername_ReturnsOk()
+        {
+            // Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var userServices = new UserServices(GetAppSettings());
+            var usersController = new UsersController(dbContext, userServices);
+
+            var mockUser = new User { UserName = "john", Password = "123456" };
+
+            // Act
+            var queryRes = usersController.Register(mockUser).Result;
+
+            var data = queryRes.Result as ObjectResult;
+
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status400BadRequest, data.StatusCode);
+        }
 
         public IOptions<AppSettings> GetAppSettings()
         {
