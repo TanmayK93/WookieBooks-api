@@ -237,6 +237,44 @@ namespace WookieBooksAPI.UnitTest.Controller
             // Assert
              Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
         }
+
+        [Fact]
+        public void DeleteBooks_WithIdInvalid_BookIdPass_ReturnStatusCode404NotFound()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+            
+            int bookid = 3;
+
+            // Act
+            var result = booksController.DeleteBooks(bookid);
+            var record = result.Result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status404NotFound, record.StatusCode);
+        }
+
+        [Fact]
+        public void DeleteBooks_WithValid_BookIdPass_ReturnStatusCode200NotFound()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            int bookid = 2;
+
+            // Act
+            var result = booksController.DeleteBooks(bookid);
+            var record = result.Result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
+        }
     }
     
 }
