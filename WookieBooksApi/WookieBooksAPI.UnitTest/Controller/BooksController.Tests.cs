@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         public void GetBooks_WhenCalled_ReturnsOkResult()
         {
             // Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(GetBooks_WhenCalled_ReturnsOkResult));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
 
             // Act
@@ -36,7 +37,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         public void GetBooks_WhenCalled_ReturnsAllItems()
         {
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(GetBooks_WhenCalled_ReturnsAllItems));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
 
             // Act
@@ -52,7 +53,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         public void GetBooksById_UnknownInValidbookIdPassed_ReturnsNotFoundObjectResult()
         {
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(GetBooksById_UnknownInValidbookIdPassed_ReturnsNotFoundObjectResult));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
             int bookid = 10;
 
@@ -69,7 +70,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         public void GetBooksById_ExistingValidbookId1Passed_ReturnsOkResult()
         {
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(GetBooksById_ExistingValidbookId1Passed_ReturnsOkResult));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
             int bookid = 1;
             
@@ -86,7 +87,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         public void GetBooksById_ExistingIdPassed1_ReturnsBookInformationWithId1()
         {
             // Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(GetBooksById_ExistingIdPassed1_ReturnsBookInformationWithId1));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
             int bookid = 1;
 
@@ -106,7 +107,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         {
 
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(CreateBooks_WithNoTitle_OR_EmptyTitle_OR_EmptyPrice_OR_NegativePrice_ReturnStatusCode400));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
             
 
@@ -124,7 +125,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         {
 
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(CreateBooks_WithValidTitlePriceAndInvalidAuthor_ReturnStatusCode404));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
 
             var mockData = new Books
@@ -153,7 +154,7 @@ namespace WookieBooksAPI.UnitTest.Controller
         {
 
             //Arrange
-            var dbContext = DbContextMocker.WookieBooksImportersDbContext(nameof(CreateBooks_WithValidTitlePriceAndValidAuthor_ReturnStatusCode200));
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
             var booksController = new BooksController(dbContext, null);
 
             var mockData = new Books
@@ -175,6 +176,66 @@ namespace WookieBooksAPI.UnitTest.Controller
             // Assert
             var record = result.Result.Result as ObjectResult;
             Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateBooks_WithInValidDetails_ReturnStatusCode403()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            var mockData = new Books
+            {
+                BookId = 2,
+                Description = "This is Book2",
+                BookPublished = true,
+                CoverImage = "data/base64",
+                Title = null,
+                AuthorId = 1,
+                Price = 12.2m,
+            };
+
+            int bookid = 2;
+
+            // Act
+            var result = booksController.UpdateBooks(bookid, mockData);
+            var record = result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+            Assert.Equal(StatusCodes.Status404NotFound, record.StatusCode);
+        }
+
+        [Fact]
+        public void UpdateBooks_WithValidDetails_ReturnStatusCode200()
+        {
+
+            //Arrange
+            var dbContext = DbContextMocker.WookieBooksImportersDbContext();
+            var booksController = new BooksController(dbContext, null);
+
+            var mockData = new Books
+            {
+                BookId = 2,
+                Description = "This is Book 2",
+                BookPublished = true,
+                CoverImage = "data/base64",
+                Title = "Book 2",
+                AuthorId = 1,
+                Price = 12.2m,
+            };
+
+            int bookid = 2;
+            
+            // Act
+            var result = booksController.UpdateBooks(bookid, mockData);
+            var record = result.Result as ObjectResult;
+            dbContext.Dispose();
+
+            // Assert
+             Assert.Equal(StatusCodes.Status200OK, record.StatusCode);
         }
     }
     

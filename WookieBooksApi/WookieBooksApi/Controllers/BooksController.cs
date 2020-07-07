@@ -122,6 +122,7 @@ namespace WookieBooksApi.Controllers
         [HttpPost]
         public async Task<ActionResult<BooksDetailsDTO>> PostBooks(Books book)
         {
+
             string authHeader = Request.Headers["Authorization"];
 
             if (!_userServices.ValidateRequest(authHeader, book.AuthorId))
@@ -184,8 +185,9 @@ namespace WookieBooksApi.Controllers
 
         // PUT: api/Books/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateBooks(int id, Books book)
+        public async Task<IActionResult> UpdateBooks(int id, [FromBody] Books book)
         {
+
             string authHeader = Request.Headers["Authorization"];
 
             if (!_userServices.ValidateRequest(authHeader, book.AuthorId))
@@ -193,29 +195,32 @@ namespace WookieBooksApi.Controllers
                 return BadRequest(new { message = "Request Not Allowed" });
             }
 
+
             if (id != book.BookId)
             {
                 return BadRequest();
             }
 
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             try
             {
-                var author = await _context.Authors.SingleOrDefaultAsync(x => x.UserId == book.AuthorId);
-
-                var updateRec = new Books
+                //Bug Fix Unit Testing.
+                var existing = await _context.Books.FindAsync(book.BookId);
+                if (existing != null)
                 {
-                    BookId = book.BookId,
-                    AuthorId = author.AuthorId,
-                    Title = book.Title,
-                    CoverImage = book.CoverImage,
-                    Description = book.Description,
-                    Price = book.Price,
-                    BookPublished = book.BookPublished
-                };
+                    existing.Title = book.Title;
+                    existing.CoverImage = book.CoverImage;
+                    existing.Description = book.Description;
+                    existing.Price = book.Price;
+                    existing.BookPublished = book.BookPublished;
 
-                _context.Entry(updateRec).State = EntityState.Modified;
-
-                await _context.SaveChangesAsync();
+                    _context.Entry(existing).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                }
             }
             catch (DbUpdateException) //Deal Save changes Error
             {
@@ -225,7 +230,7 @@ namespace WookieBooksApi.Controllers
                 }
                 else
                 {
-                    return StatusCode(403, new { message = "Invalid Request" });
+                    return StatusCode(404, new { message = "Invalid Request" });
                 }
             }
             

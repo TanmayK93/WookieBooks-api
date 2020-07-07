@@ -103,8 +103,10 @@ namespace WookieBooksAPI.UnitTest.Models
                 }
             };
 
+            /*
             _context.Roles.AddRange(roles);
             _context.SaveChanges();
+            */
 
             _context.Users.AddRange(users);
             _context.SaveChanges();

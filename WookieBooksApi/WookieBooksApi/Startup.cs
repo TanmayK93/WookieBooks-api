@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using WookieBooksApi.Helpers;
 using WookieBooksApi.Models;
 using Microsoft.AspNetCore.Http;
+using WookieBooksApi.Filters;
 
 namespace WookieBooksApi
 {
@@ -36,6 +37,7 @@ namespace WookieBooksApi
             services.AddMvc(options =>
             {
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                options.Filters.Add(typeof(ValidateModelAttribute));
             });
 
             // configure strongly typed settings objects
