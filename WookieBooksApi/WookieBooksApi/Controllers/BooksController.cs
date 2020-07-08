@@ -31,6 +31,7 @@ namespace WookieBooksApi.Controllers
         [HttpGet]
         public  ActionResult<IEnumerable<Books>> GetBooks()
         {
+            //Only Published Books Will be shown to the end users.
             var results =  (from books in _context.Books
                            join author in _context.Authors on books.AuthorId equals author.AuthorId
                            where books.BookPublished == true
@@ -47,6 +48,14 @@ namespace WookieBooksApi.Controllers
 
             return Ok(results);
         }
+
+        /// <summary>
+        /// Search Books Based on ID.
+        /// 1. If found record the detail record of book.
+        /// 2. Else Return message with book doesnt exist
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
 
         // GET: api/Books/5
         [AllowAnonymous]
@@ -75,6 +84,13 @@ namespace WookieBooksApi.Controllers
             
             return Ok(booksDetails);
         }
+        /// <summary>
+        /// Search Books by title or wuthor name
+        /// 1. If not found return empty object
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="authorName"></param>
+        /// <returns></returns>
 
         // GET: 
         [AllowAnonymous]
@@ -100,6 +116,12 @@ namespace WookieBooksApi.Controllers
             return Ok(results);
         }
 
+        /// <summary>
+        /// Return books for the login author. 
+        /// Only Books of login in user will be return. If not found return empty object
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <returns></returns>
         // GET:
         [HttpGet("authorBooks/{userId}")]
         [Authorize]
@@ -118,11 +140,25 @@ namespace WookieBooksApi.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Create a new Book by validating below conditions.
+        /// 1. Login author should be same received userid from HTTP request.
+        /// 2. Check for empty field. 
+        /// 3. Authorid details should match in exisiting system.
+        /// 4. If all the above details are valid return details of book.
+        /// </summary>
+        /// <param name="book"></param>
+        /// <returns></returns>
+
         // POST: api/Books
         [HttpPost]
         public async Task<ActionResult<BooksDetailsDTO>> PostBooks(Books book)
         {
-
+            /* The code is used in the books controller for additional validation at server side. 
+             * Which would authenticate the request based on userId send from route and token. 
+             * If it matches then request will be processed 
+             */
+            
             string authHeader = Request.Headers["Authorization"];
 
             if (!_userServices.ValidateRequest(authHeader, book.AuthorId))
@@ -183,10 +219,22 @@ namespace WookieBooksApi.Controllers
             return Ok(new { message = "Book Added Successfully!", data = booksDetails });
         }
 
+        /// <summary>
+        /// This route is used to update the book record for the logged author.
+        /// if valid details are send record will be updated
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="book"></param>
+        /// <returns></returns>
+
         // PUT: api/Books/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateBooks(int id, [FromBody] Books book)
         {
+            /* The code is used in the books controller for additional validation at server side. 
+            * Which would authenticate the request based on userId send from route and token. 
+            * If it matches then request will be processed 
+            */
 
             string authHeader = Request.Headers["Authorization"];
 
@@ -237,6 +285,12 @@ namespace WookieBooksApi.Controllers
             return Ok(new { message = "Book Record Updated Successfully..!" });
         }
 
+        /// <summary>
+        /// This route is used to delete book record based on id.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+
         // DELETE: api/Books/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Books>> DeleteBooks(int id)
@@ -261,10 +315,23 @@ namespace WookieBooksApi.Controllers
             return Ok(new { message = "Book record Deleted Successfully..!" });
         }
 
+        /// <summary>
+        /// This route is used to unpublish a book.
+        /// 1. First Validation will be done of userid received in route and auth header if details are valid then request is processed.
+        /// </summary>
+        /// <param name="authorUId"></param>
+        /// <param name="bookid"></param>
+        /// <returns></returns>
+
         // DELETE
         [HttpDelete("unpublishbook/{authorUId}/{bookid}")]
         public async Task<ActionResult<Books>> PublishUnpublishBook([FromRoute] int authorUId, [FromRoute] int bookid)
         {
+            /* The code is used in the books controller for additional validation at server side. 
+            * Which would authenticate the request based on userId send from route and token. 
+            * If it matches then request will be processed 
+            */
+
             string authHeader = Request.Headers["Authorization"];
 
             if (!_userServices.ValidateRequest(authHeader, authorUId))
@@ -272,6 +339,7 @@ namespace WookieBooksApi.Controllers
                 return BadRequest(new { message = "Request Not Allowed" });
             }
 
+            //Check for the book details
             var books = _context.Books.FirstOrDefault
                 (b => b.BookId == bookid && b.Author.UserId == authorUId);
 

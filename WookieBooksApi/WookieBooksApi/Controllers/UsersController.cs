@@ -25,6 +25,14 @@ namespace WookieBooksApi.Controllers
         }
 
 
+        /// <summary>
+        /// This block is used to register the user.
+        /// Once details are validated the user will be created.
+        /// IF username already exist the erorr will be thrown
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+
         // POST: api/Users/Register
         [HttpPost]
         [Route("Register")]
@@ -71,6 +79,12 @@ namespace WookieBooksApi.Controllers
 
             return Ok(new { message = "User Registered Successfully!" });
         }
+
+        /// <summary>
+        /// This route is used for login purpose and return JWT token with username and userid and token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
 
         // POST: api/Users/Login
         [HttpPost]
