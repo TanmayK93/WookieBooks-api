@@ -23,6 +23,14 @@ namespace WookieBooksApi
             _appSettings = appSettings.Value;
         }
 
+        /// <summary>
+        /// This block of code is used to validate the user password with exisitng password.
+        /// If its valid create a token and back to client.
+        /// </summary>
+        /// <param name="existingUser"></param>
+        /// <param name="receivedUser"></param>
+        /// <param name="_context"></param>
+        /// <returns></returns>
         public ApiResponse Authenticate(User existingUser, User receivedUser, AppDbContext _context)
         {
             var passwordHasher = new PasswordHasher<User>();
@@ -38,6 +46,13 @@ namespace WookieBooksApi
                 return null;
             }
         }
+
+        /// <summary>
+        /// Generate Token for the user and determine type of role[Wookie, Admin]
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="_context"></param>
+        /// <returns></returns>
 
         private string generateJwtToken(User user, AppDbContext _context)
         {
@@ -74,6 +89,14 @@ namespace WookieBooksApi
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+        /// <summary>
+        /// This block is used to validate the token information before processing 
+        /// GET, POST, PUT and Delete request.
+        /// </summary>
+        /// <param name="Header"></param>
+        /// <param name="userId"></param>
+        /// <returns></returns>
 
         public bool ValidateRequest(string Header, int userId)
         {

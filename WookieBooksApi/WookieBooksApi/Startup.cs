@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using WookieBooksApi.Helpers;
 using WookieBooksApi.Models;
 using Microsoft.AspNetCore.Http;
+using WookieBooksApi.Filters;
 
 namespace WookieBooksApi
 {
@@ -36,6 +37,7 @@ namespace WookieBooksApi
             services.AddMvc(options =>
             {
                 options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+                options.Filters.Add(typeof(ValidateModelAttribute));
             });
 
             // configure strongly typed settings objects
@@ -71,6 +73,7 @@ namespace WookieBooksApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
+            //Auto run migrations
             using (IServiceScope serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
                 AppDbContext context = serviceScope.ServiceProvider.GetService<AppDbContext>();
@@ -82,6 +85,7 @@ namespace WookieBooksApi
                 app.UseDeveloperExceptionPage();
             }
             app.UseAuthentication();
+            //Custom error handeling for unauthorize requests
             app.UseStatusCodePages(async context =>
             {
                 context.HttpContext.Response.ContentType = "application/json; charset=utf-8";

@@ -25,6 +25,14 @@ namespace WookieBooksApi.Controllers
         }
 
 
+        /// <summary>
+        /// This block is used to register the user.
+        /// Once details are validated the user will be created.
+        /// IF username already exist the erorr will be thrown
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
+
         // POST: api/Users/Register
         [HttpPost]
         [Route("Register")]
@@ -55,10 +63,14 @@ namespace WookieBooksApi.Controllers
 
                 Author author = new Author { AuthorName = user.Name, UserId = result.Entity.UserId };
                 _context.Authors.Add(author);
-                
-                _context.UserRoleMappings.Add(new UserRoleMapping { UserId = result.Entity.UserId });
-
                 await _context.SaveChangesAsync();
+
+                if(author.UserId == result.Entity.UserId)
+                {
+                    _context.UserRoleMappings.Add(new UserRoleMapping { UserId = result.Entity.UserId, RoleId = 2 });
+                    await _context.SaveChangesAsync();
+                }
+
             }
             else
             {
@@ -67,6 +79,12 @@ namespace WookieBooksApi.Controllers
 
             return Ok(new { message = "User Registered Successfully!" });
         }
+
+        /// <summary>
+        /// This route is used for login purpose and return JWT token with username and userid and token
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
 
         // POST: api/Users/Login
         [HttpPost]
